@@ -1,5 +1,6 @@
 import React from 'react';
-import {getMergeSortAnimations} from '../sortingAlgorithms/sortingAlgorithms.js';
+import {getMergeSortAnimations}from '../sortingAlgorithms/sortingAlgorithms.js';
+import {getBubbleSortAnimations}from '../sortingAlgorithms/sortingAlgorithms.js';
 import './SortingVisualizer.css';
 
 const ANIMATION_SPEED_MS = 1;
@@ -26,7 +27,7 @@ export default class SortingVisualizer extends React.Component {
   resetArray() {
     const array = [];
     for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
-      array.push(randomIntFromInterval(5, 730));
+      array.push(randomIntFromInterval(5, 680));
     }
     this.setState({array});
   }
@@ -57,8 +58,37 @@ export default class SortingVisualizer extends React.Component {
 
 
   bubbleSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
-  }
+
+     const [animations,sortArray] = getBubbleSortAnimations(this.state.array);
+        for (let i = 0; i < animations.length; i++) {
+            const isColorChange = animations[i][0] == "comparision1" || animations[i][0] == "comparision2";
+            const arrayBars = document.getElementsByClassName('array-bar');
+            if(isColorChange === true) {
+                const color = (animations[i][0] == "comparision1") ? SECONDARY_COLOR : PRIMARY_COLOR;
+                const [comparision, barOneIndex, barTwoIndex] = animations[i];
+                const barOneStyle = arrayBars[barOneIndex].style;
+                const barTwoStyle = arrayBars[barTwoIndex].style;
+                setTimeout(() => {
+                    barOneStyle.backgroundColor = color;
+                    barTwoStyle.backgroundColor = color;
+                },i * ANIMATION_SPEED_MS);
+            }
+            else {
+                const [swap, barIndex, newHeight] = animations[i];
+                if (barIndex === -1) {
+                    continue;
+                }
+                const barStyle = arrayBars[barIndex].style;
+                setTimeout(() => {
+                    barStyle.height = `${newHeight}px`;
+                },i * ANIMATION_SPEED_MS);  
+            }
+        }
+        // this.setState({array: sortArray})
+        const RESTORE_TIME = parseInt(ANIMATION_SPEED_MS*animations.length/2 + 3000);
+        setTimeout(() => this.restoreStoreButtons(), RESTORE_TIME);  
+    }
+  
 
   render() {
     const {array} = this.state;
